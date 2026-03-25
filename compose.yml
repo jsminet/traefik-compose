@@ -30,8 +30,6 @@ services:
       # Mount the users file
       - ./app/traefik/users/usersfile:/etc/traefik/usersfile
       - acme-data:/letsencrypt
-    secrets:
-      - traefik_basicauth
     deploy:
       <<: *low-resources
       update_config:
@@ -42,12 +40,15 @@ services:
           - node.role == manager
       labels:
         - "traefik.enable=true"
+        # Dashboard
+        - "traefik.http.routers.dashboard.rule=Host(`$TRAEFIK_DNS`)"
+        - "traefik.http.routers.dashboard.entrypoints=websecure"
+        - "traefik.http.routers.dashboard.service=api@internal"
+        - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
+        - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
+              # Authentification basique dashboard
+        - "traefik.http.routers.dashboard.middlewares=traefik-auth"
         - "traefik.http.middlewares.traefik-auth.basicauth.usersfile=/etc/traefik/usersfile"
-        - "traefik.http.routers.traefik.rule=Host(`$TRAEFIK_DNS`)"
-        - "traefik.http.routers.traefik.entrypoints=websecure"
-        - "traefik.http.routers.traefik.service=traefik"
-        - "traefik.http.routers.traefik.tls.certresolver=myresolver"
-        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-        
+
 volumes:
   acme-data:
