@@ -48,11 +48,6 @@ services:
         - "traefik.http.routers.traefik.service=traefik"
         - "traefik.http.routers.traefik.tls.certresolver=myresolver"
         - "traefik.http.services.traefik.loadbalancer.server.port=8080"
- 
-
+        
 volumes:
   acme-data:
-
-secrets:
-  traefik_basicauth:
-    external: true
