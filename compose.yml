@@ -1,0 +1,58 @@
+x-low-resources: &low-resources
+  resources:
+    limits:
+      cpus: '0.3'
+      memory: 128M
+    reservations:
+      cpus: '0.15'
+      memory: 64M
+
+x-mid-resources: &mid-resources
+  resources:
+    limits:
+      cpus: '0.8'
+      memory: 512M
+    reservations:
+      cpus: '0.25'
+      memory: 128M
+
+services:
+  traefik:
+    image: traefik:v3.6.11
+    ports:
+      # Exposes port 80 for incomming web requests
+      - 80:80
+      - 443:443
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./app/traefik/conf/traefik.yml:/etc/traefik/traefik.yml
+      # Mount the users file
+      - ./app/traefik/users/usersfile:/etc/traefik/usersfile
+      - acme-data:/letsencrypt
+    secrets:
+      - traefik_basicauth
+    deploy:
+      <<: *low-resources
+      update_config:
+        delay: 10s
+        order: start-first
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.middlewares.traefik-auth.basicauth.usersfile=/etc/traefik/usersfile"
+        - "traefik.http.routers.traefik.rule=Host(`$TRAEFIK_DNS`)"
+        - "traefik.http.routers.traefik.entrypoints=websecure"
+        - "traefik.http.routers.traefik.service=traefik"
+        - "traefik.http.routers.traefik.tls.certresolver=myresolver"
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+ 
+
+volumes:
+  acme-data:
+
+secrets:
+  traefik_basicauth:
+    external: true
