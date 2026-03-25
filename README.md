@@ -26,10 +26,10 @@ The **stack.yml** generated file is ready to deploy on a Swarm cluster (see Usag
 ### Docker secret
 
 - Windows gitbash
-
 ```bash
 openssl rand -base64 20 | docker secret create traefik_basicauth -
 ```
+
 - Linux shell
 ```bash
 echo $(htpasswd -nb username password) | sed -e s/\\$/\\$\\$/g
