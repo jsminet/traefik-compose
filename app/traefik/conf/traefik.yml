@@ -12,6 +12,7 @@ providers:
   swarm:
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
+    watch: true
   #docker:
   #  exposedByDefault: false
   #  watch: true
@@ -34,6 +35,9 @@ entryPoints:
           permanent: true
   websecure:
     address: :443
+    http:
+      tls: true
+      certresolver: myresolver
 ################################################################
 # Challenge TLS
 ################################################################
